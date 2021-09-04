@@ -42,9 +42,6 @@ public class Product {
 	@Column(name = "createdAt")
 	private Date createdAt;
 	
-	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-	private Order order;
-	
 	public Product() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -127,14 +124,6 @@ public class Product {
 		this.createdAt = createdAt;
 	}
 	
-	public Order getOrder() {
-		return order;
-	}
-
-	public void setOrder(Order order) {
-		this.order = order;
-	}
-
 
 	@Override
 	public String toString() {

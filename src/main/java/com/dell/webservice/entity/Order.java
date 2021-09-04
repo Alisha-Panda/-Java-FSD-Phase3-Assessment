@@ -25,8 +25,8 @@ public class Order {
 	@Column(name = "name")
 	private String name;
 	
-	@Column(name = "price")
-	private double price;
+	@Column(name = "totalPrice")
+	private double totalPrice;
 	
 	@Column(name = "email")
 	private String email;
@@ -37,7 +37,7 @@ public class Order {
 	@Column(name = "phoneNo")
 	private String phoneNo;
 	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@OneToMany(cascade=CascadeType.MERGE, fetch=FetchType.LAZY)
 	private Set<Product> products;
 
 	public Order() {
@@ -45,11 +45,11 @@ public class Order {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Order(int id, String name, double price, String email, String address, String phoneNo){
+	public Order(int id, String name, double totalPrice, String email, String address, String phoneNo){
 		super();
 		this.id = id;
 		this.name = name;
-		this.price = price;
+		this.totalPrice = totalPrice;
 		this.email = email;
 		this.address = address;
 		this.phoneNo = phoneNo;
@@ -71,12 +71,12 @@ public class Order {
 		this.name = name;
 	}
 
-	public double getPrice() {
-		return price;
+	public double getTotalPrice() {
+		return totalPrice;
 	}
 
-	public void setPrice(double price) {
-		this.price = price;
+	public void setTotalPrice(double totalPrice) {
+		this.totalPrice = totalPrice;
 	}
 
 	public String getEmail() {
@@ -113,7 +113,7 @@ public class Order {
 
 	@Override
 	public String toString() {
-		return "Order [id=" + id + ", name=" + name + ", price=" + price + ", email=" + email + ", address=" + address
+		return "Order [id=" + id + ", name=" + name + ", totalPrice=" + totalPrice + ", email=" + email + ", address=" + address
 				+ ", phoneNo=" + phoneNo + "]";
 	}
 	
