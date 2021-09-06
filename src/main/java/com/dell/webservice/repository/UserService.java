@@ -20,39 +20,71 @@ public class UserService {
 	@Autowired
 	UserRepository userRepository;
 	
-	public List<User> getEntityUsers(Integer pageNo, Integer pageSize, String sortBy){
-		Pageable paging = PageRequest.of(pageNo, pageSize,Sort.by(sortBy));
-		Page<User> pagedResult =  userRepository.findAll(paging);
-		if(pagedResult.hasContent()) {
-            return pagedResult.getContent();
-        } else {
-            return new ArrayList<User>();
-        }
+	public boolean loginEntityUser(User loginUser) {
+		Iterable<User> users = this.userRepository.findAll();
+		int flag = 0;
+		for(User u : users) {
+			if(u.getUsername().equals(loginUser.getUsername())) {
+				u.setLoggedIn(true);
+				this.userRepository.save(u);
+				flag = 1;
+				break;
+			}
+		}
+		if(flag == 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
-	public Optional<User> getEntityUser(int userId){
+	public List<User> getEntityUsers(Integer pageNo, Integer pageSize, String sortBy) throws Exception{
+		try {
+			Pageable paging = PageRequest.of(pageNo, pageSize,Sort.by(sortBy));
+			Page<User> pagedResult =  userRepository.findAll(paging);
+			if(pagedResult.hasContent()) {
+	            return pagedResult.getContent();
+	        } else {
+	            return new ArrayList<User>();
+	        }
+		}
+		catch(Exception ex) {
+			throw new Exception("Unable to retrieve users "+ex.getMessage().toString());
+		}
+	}
+	public Optional<User> getEntityUser(int userId) throws Exception{
+		try {
+			Optional<User> user = this.userRepository.findById(userId);
+			return user;
+		}
+		catch(Exception ex){
+			throw new Exception("Unable to retrieve user with id"+userId+" "+ex.getMessage().toString());
+		}
+	}
+	public void addEntityUser(User addUser) throws Exception {
+		try {
+			this.userRepository.save(addUser);
+		}
+		catch(Exception ex) {
+			throw new Exception("Unable to add user "+ex.getMessage().toString());
+		}
+	}
 	
-//		if(getUser != null) {
-//		}
-		return this.userRepository.findById(userId);
-	}
-	public void addEntityUser(User addUser) {
-//		if(addUser != null) {
-//			
-//		}
-		this.userRepository.save(addUser);
+	public void updateEntityUser(User updateUser) throws Exception {
+		try {
+			this.userRepository.save(updateUser);
+		}
+		catch(Exception ex) {
+			throw new Exception("Unable to update user "+ex.getMessage().toString());
+		}
 	}
 	
-	public void updateEntityUser(User updateUser) {
-//		if(addUser != null) {
-//			
-//		}
-		this.userRepository.save(updateUser);
-	}
-	
-	public void deleteEntityUser(int userId) {
-//		if(addUser != null) {
-//			
-//		}
-		this.userRepository.deleteById(userId);
+	public void deleteEntityUser(int userId) throws Exception {
+		try {
+			this.userRepository.deleteById(userId);
+		}
+		catch(Exception ex) {
+			throw new Exception("Unable to delete user "+ex.getMessage().toString());
+		}
 	}
 }

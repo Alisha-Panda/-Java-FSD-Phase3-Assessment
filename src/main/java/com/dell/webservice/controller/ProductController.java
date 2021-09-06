@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dell.webservice.entity.Order;
 import com.dell.webservice.entity.Product;
+import com.dell.webservice.entity.User;
 import com.dell.webservice.repository.ProductService;
 
 @RestController
@@ -28,42 +30,100 @@ public class ProductController {
 	ProductService productService;
 	
 	@GetMapping("/getproducts")
-	public ResponseEntity<List<Product>> getProducts(@RequestParam(defaultValue = "0") Integer pageNo, 
+	public ResponseEntity<?> getProducts(@RequestParam(defaultValue = "0") Integer pageNo, 
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy){
-		List<Product> list = productService.getEntityProducts(pageNo, pageSize, sortBy);
-		return new ResponseEntity<List<Product>>(list, new HttpHeaders(), HttpStatus.OK); 
+            @RequestParam(defaultValue = "id") String sortBy,@RequestParam(required = false) String name){
+		try {
+			List<Product> list = productService.getEntityProducts(pageNo, pageSize, sortBy, name);
+			return new ResponseEntity<List<Product>>(list, new HttpHeaders(), HttpStatus.OK); 
+		}
+		catch(Exception ex) {
+			return new ResponseEntity<String>("Unable to fetch products", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR); 
+		}
 	}
 	
 	@GetMapping("/getproduct/{productId}")
-	public ResponseEntity<Optional<Product>> getProduct(@PathVariable("productId") int id) {
-		return new ResponseEntity<Optional<Product>>(this.productService.getEntityProduct(id),new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<?> getProduct(@PathVariable("productId") int id) {
+		try {
+			Optional<Product> product = this.productService.getEntityProduct(id);
+			if(product.isEmpty()) {
+				return new ResponseEntity<String>("Products does not exist with id " + id, new HttpHeaders(), HttpStatus.NOT_FOUND); 
+			}
+			else {
+				return new ResponseEntity<Optional<Product>>(product,new HttpHeaders(), HttpStatus.OK);
+			}
+		}
+		catch(Exception ex) {
+			System.out.println(ex.getMessage().toString());
+			return new ResponseEntity<String>("Unable to fetch products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
+//	@GetMapping("/getproduct/{productName}")
+//	public ResponseEntity<?> getProductByName(@PathVariable("productName") String productName) {
+//		try {
+//			Optional<Product> product = this.productService.getEntityProductByName(productName);
+//			if(product.isEmpty()) {
+//				return new ResponseEntity<String>("Products does not exist with name " + productName, new HttpHeaders(), HttpStatus.NOT_FOUND); 
+//			}
+//			else {
+//				return new ResponseEntity<Optional<Product>>(product,new HttpHeaders(), HttpStatus.OK);
+//			}
+//		}
+//		catch(Exception ex) {
+//			System.out.println(ex.getMessage().toString());
+//			return new ResponseEntity<String>("Unable to fetch products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
+	
 	@PostMapping("/addproduct")
-	public ResponseEntity<Product> addProduct(@RequestBody(required = false) Product addProduct){
-		this.productService.addEntityProduct(addProduct);
-		return new ResponseEntity<Product>(addProduct, new HttpHeaders(), HttpStatus.CREATED);
+	public ResponseEntity<?> addProduct(@RequestBody(required = false) Product addProduct){
+		if(addProduct == null) {
+			return new ResponseEntity<String>("Add Product request body cannot be empty", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			this.productService.addEntityProduct(addProduct);
+			return new ResponseEntity<Product>(addProduct, new HttpHeaders(), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<String>("Unable to add products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@PutMapping("/updateproduct/{productId}")
-	public ResponseEntity<Product> updateProduct(@PathVariable("productId") int id, @RequestBody(required = false) Product updateProduct) {
-		if(id != updateProduct.getId()) {
-			return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> updateProduct(@PathVariable("productId") int id, @RequestBody(required = false) Product updateProduct) {
+		if(updateProduct == null) {
+			return new ResponseEntity<String>("Update Product request body cannot be empty",new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
-		this.productService.updateEntityProduct(updateProduct);
-		return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+		if(id != updateProduct.getId()) {
+			return new ResponseEntity<String>("Id in request path and request body do not match",new HttpHeaders(), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			Optional<Product> getProduct = this.productService.getEntityProduct(id);
+			if(getProduct.isEmpty()) {
+				return new ResponseEntity<String>("Product does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			}
+			this.productService.updateEntityProduct(updateProduct);
+			return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+		}
+		catch(Exception ex) {
+			return new ResponseEntity<String>("Unable to update products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@DeleteMapping("/deleteproduct/{productId}")
-	public ResponseEntity<Product> deleteProduct(@PathVariable("productId") int id){
-		Object getProduct = this.productService.getEntityProduct(id);
-		if(getProduct == null) {
-			return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NOT_FOUND);
+	public ResponseEntity<?> deleteProduct(@PathVariable("productId") int id){
+		try {
+			Optional<Product> getProduct= this.productService.getEntityProduct(id);
+			if(getProduct.isEmpty()) {
+				return new ResponseEntity<String>("Product does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			}
+			else {
+				this.productService.deleteEntityProduct(id);
+				return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+			}
 		}
-		else {
-			this.productService.deleteEntityProduct(id);
-			return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+		catch(Exception ex) {
+			return new ResponseEntity<String>("Unable to delete products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 	}

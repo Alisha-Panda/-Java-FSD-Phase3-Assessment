@@ -27,20 +27,34 @@ public class User {
 	
 	@Column(name = "role")
 	private String role;
+	
+	@Column(name = "loggedIn")
+	private boolean loggedIn = false;
 
 	public User() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	public User(String username, String password, String email, String role, boolean loggedIn) {
+		super();
+		this.username = username;
+		this.password = password;
+		this.email = email;
+		this.role = role;
+		this.loggedIn = loggedIn;
+	}
 
-	public User(int id, String username, String password, String email, String role) {
+	public User(int id, String username, String password, String email, String role, boolean loggedIn) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.role = role;
+		this.loggedIn = loggedIn;
 	}
+
 
 	public int getId() {
 		return id;
@@ -81,13 +95,20 @@ public class User {
 	public void setRole(String role) {
 		this.role = role;
 	}
+	public boolean isLoggedIn() {
+		return loggedIn;
+	}
+
+
+	public void setLoggedIn(boolean loggedIn) {
+		this.loggedIn = loggedIn;
+	}
+	
 
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email + ", role="
-				+ role + "]";
-	}
-	
-	
+				+ role + ", loggedIn=" + loggedIn + "]";
+	}	
 
 }

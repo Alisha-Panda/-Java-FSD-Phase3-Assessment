@@ -44,8 +44,18 @@ public class Order {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	public Order(String name, double totalPrice, String email, String address, String phoneNo, Set<Product> products) {
+		super();
+		this.name = name;
+		this.totalPrice = totalPrice;
+		this.email = email;
+		this.address = address;
+		this.phoneNo = phoneNo;
+		this.products = products;
+	}
 
-	public Order(int id, String name, double totalPrice, String email, String address, String phoneNo){
+	public Order(int id, String name, double totalPrice, String email, String address, String phoneNo,
+			Set<Product> products) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -53,8 +63,8 @@ public class Order {
 		this.email = email;
 		this.address = address;
 		this.phoneNo = phoneNo;
+		this.products = products;
 	}
-
 	public int getId() {
 		return id;
 	}

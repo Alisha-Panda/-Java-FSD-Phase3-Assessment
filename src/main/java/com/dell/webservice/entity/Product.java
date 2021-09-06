@@ -59,6 +59,17 @@ public class Product {
 		this.seller = seller;
 		this.createdAt = createdAt;
 	}
+	public Product(String name, double price, String description, String brand, String category, String seller,
+			Date createdAt) {
+		super();
+		this.name = name;
+		this.price = price;
+		this.description = description;
+		this.brand = brand;
+		this.category = category;
+		this.seller = seller;
+		this.createdAt = createdAt;
+	}
 
 	public int getId() {
 		return id;

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dell.webservice.entity.Order;
+import com.dell.webservice.entity.User;
 import com.dell.webservice.repository.OrderService;
 
 
@@ -29,42 +30,83 @@ public class OrderController {
 	OrderService orderService;
 	
 	@GetMapping("/getorders")
-	public ResponseEntity<List<Order>> getOrders(@RequestParam(defaultValue = "0") Integer pageNo, 
+	public ResponseEntity<?> getOrders(@RequestParam(defaultValue = "0") Integer pageNo, 
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy){
-		List<Order> list = orderService.getEntityOrders(pageNo, pageSize, sortBy);
-		return new ResponseEntity<List<Order>>(list, new HttpHeaders(), HttpStatus.OK); 
+		try {
+			List<Order> list = orderService.getEntityOrders(pageNo, pageSize, sortBy);
+			return new ResponseEntity<List<Order>>(list, new HttpHeaders(), HttpStatus.OK); 
+		}
+		catch(Exception ex) {
+			return new ResponseEntity<String>("Unable to fetch orders", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR); 
+		}
 	}
 	
 	@GetMapping("/getorder/{orderId}")
-	public ResponseEntity<Optional<Order>> getOrder(@PathVariable("orderId") int id) {
-		return new ResponseEntity<Optional<Order>>(this.orderService.getEntityOrder(id),new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<?> getOrder(@PathVariable("orderId") int id) {
+		try {
+			Optional<Order> order = this.orderService.getEntityOrder(id);
+			if(order.isEmpty()) {
+				return new ResponseEntity<String>("Orders does not exist with id " + id, new HttpHeaders(), HttpStatus.NOT_FOUND); 
+			}
+			else {
+				return new ResponseEntity<Optional<Order>>(order,new HttpHeaders(), HttpStatus.OK);
+			}
+		}
+		catch(Exception ex) {
+			System.out.println(ex.getMessage().toString());
+			return new ResponseEntity<String>("Unable to fetch orders",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@PostMapping("/addorder")
-	public ResponseEntity<Order> addOrder(@RequestBody(required = false) Order addOrder){
-		this.orderService.addEntityOrder(addOrder);
-		return new ResponseEntity<Order>(addOrder, new HttpHeaders(), HttpStatus.CREATED);
+	public ResponseEntity<?> addOrder(@RequestBody(required = false) Order addOrder){
+		if(addOrder == null) {
+			return new ResponseEntity<String>("Add Order request body cannot be empty", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			this.orderService.addEntityOrder(addOrder);
+			return new ResponseEntity<Order>(addOrder, new HttpHeaders(), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<String>("Unable to add orders",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@PutMapping("/updateorder/{orderId}")
-	public ResponseEntity<Order> updateOrder(@PathVariable("orderId") int id, @RequestBody(required = false) Order updateOrder) {
-		if(id != updateOrder.getId()) {
-			return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> updateOrder(@PathVariable("orderId") int id, @RequestBody(required = false) Order updateOrder) {
+		if(updateOrder == null) {
+			return new ResponseEntity<String>("Update Order request body cannot be empty",new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
-		this.orderService.updateEntityOrder(updateOrder);
-		return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+		if(id != updateOrder.getId()) {
+			return new ResponseEntity<String>("Id in request path and request body do not match",new HttpHeaders(), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			Optional<Order> getOrder = this.orderService.getEntityOrder(id);
+			if(getOrder.isEmpty()) {
+				return new ResponseEntity<String>("Order does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			}
+			this.orderService.updateEntityOrder(updateOrder);
+			return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+		}
+		catch(Exception ex) {
+			return new ResponseEntity<String>("Unable to update orders",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@DeleteMapping("/deleteorder/{orderId}")
-	public ResponseEntity<Order> deleteOrder(@PathVariable("orderId") int id){
-		Object getOrder = this.orderService.getEntityOrder(id);
-		if(getOrder == null) {
-			return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NOT_FOUND);
+	public ResponseEntity<?> deleteOrder(@PathVariable("orderId") int id){
+		try {
+			Optional<Order> getOrder = this.orderService.getEntityOrder(id);
+			if(getOrder.isEmpty()) {
+				return new ResponseEntity<String>("Order does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			}
+			else {
+				this.orderService.deleteEntityOrder(id);
+				return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+			}
 		}
-		else {
-			this.orderService.deleteEntityOrder(id);
-			return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+		catch(Exception ex) {
+			return new ResponseEntity<String>("Unable to delete orders",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 	}
