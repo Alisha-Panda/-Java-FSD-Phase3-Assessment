@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dell.webservice.entity.Order;
 import com.dell.webservice.entity.Product;
 import com.dell.webservice.entity.User;
+import com.dell.webservice.interfaces.UserRepository;
 import com.dell.webservice.repository.ProductService;
+import com.dell.webservice.repository.UserService;
 
 @RestController
 @RequestMapping("api/v1/product")
@@ -29,10 +31,14 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 	
+	@Autowired
+	UserRepository userRepository ;
+	
 	@GetMapping("/getproducts")
 	public ResponseEntity<?> getProducts(@RequestParam(defaultValue = "0") Integer pageNo, 
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,@RequestParam(required = false) String name){
+	
 		try {
 			List<Product> list = productService.getEntityProducts(pageNo, pageSize, sortBy, name);
 			return new ResponseEntity<List<Product>>(list, new HttpHeaders(), HttpStatus.OK); 
@@ -59,22 +65,6 @@ public class ProductController {
 		}
 	}
 	
-//	@GetMapping("/getproduct/{productName}")
-//	public ResponseEntity<?> getProductByName(@PathVariable("productName") String productName) {
-//		try {
-//			Optional<Product> product = this.productService.getEntityProductByName(productName);
-//			if(product.isEmpty()) {
-//				return new ResponseEntity<String>("Products does not exist with name " + productName, new HttpHeaders(), HttpStatus.NOT_FOUND); 
-//			}
-//			else {
-//				return new ResponseEntity<Optional<Product>>(product,new HttpHeaders(), HttpStatus.OK);
-//			}
-//		}
-//		catch(Exception ex) {
-//			System.out.println(ex.getMessage().toString());
-//			return new ResponseEntity<String>("Unable to fetch products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-//		}
-//	}
 	
 	@PostMapping("/addproduct")
 	public ResponseEntity<?> addProduct(@RequestBody(required = false) Product addProduct){

@@ -38,6 +38,29 @@ public class UserService {
 			return false;
 		}
 	}
+	
+	public boolean logoutEntityUser(String logoutUser) {
+		Iterable<User> users = this.userRepository.findAll();
+		
+		int flag = 0;
+		for(User u : users) {
+			if(u.getUsername().equals(logoutUser)) {
+				System.out.println(u.isLoggedIn());
+				if(u.isLoggedIn() == true) {
+					u.setLoggedIn(false);
+					this.userRepository.save(u);
+					flag = 1;
+					break;
+				}
+			}
+		}
+		if(flag == 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 	public List<User> getEntityUsers(Integer pageNo, Integer pageSize, String sortBy) throws Exception{
 		try {
 			Pageable paging = PageRequest.of(pageNo, pageSize,Sort.by(sortBy));

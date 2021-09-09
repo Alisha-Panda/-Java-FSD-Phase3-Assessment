@@ -41,6 +41,16 @@ public class UserController {
 			return new ResponseEntity<String>("{\"error\" : \"Unauthorized\",\"message\" : \"Access denied\"}",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 		}
 	}
+	@PostMapping("/logout/{username}")
+	public ResponseEntity<String> logoutUser(@PathVariable("username") String logoutUser){
+		boolean flag = this.userService.logoutEntityUser(logoutUser);
+		if(flag == true) {
+			return new ResponseEntity<String>("{\"loggedOut\" : true}",new HttpHeaders(), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<String>("{\"error\" : \"Unauthorized\",\"message\" : \"Access denied\"}",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+		}
+	}
 	@GetMapping("/getusers")
 	public ResponseEntity<?> getUsers(@RequestParam(defaultValue = "0") Integer pageNo, 
             @RequestParam(defaultValue = "10") Integer pageSize,
