@@ -39,10 +39,10 @@ public class UserControllerTest {
 	@DisplayName("Get user by id")
 	public void testGetUserById() {
 		
-		String url = "http://localhost:"+randomPort+"/api/v1/user/getuser/13";
+		String url = "http://localhost:"+randomPort+"/api/v1/user/getuser/18";
 		ResponseEntity<User> response = testRestTemplate.getForEntity(url,User.class);
 		assertEquals(200,response.getStatusCode().value());
-		assertEquals(13, response.getBody().getId());
+		assertEquals(18, response.getBody().getId());
 		assertEquals("Tanuja", response.getBody().getUsername());
 		assertEquals("admin", response.getBody().getRole());
 	}
@@ -66,8 +66,8 @@ public class UserControllerTest {
 	@DisplayName("Update user")
 	public void testUpdateUser() {
 		
-		String url = "http://localhost:"+randomPort+"/api/v1/user/updateuser/13";
-		User user = new User(13,"Tanuja","abcd","Tanuja.Lavu@dell.com","admin",true);
+		String url = "http://localhost:"+randomPort+"/api/v1/user/updateuser/16";
+		User user = new User(16,"Avilasa","abcd","Avilasa.Das@dell.com","user",true);
 		
 		HttpEntity<User> requestObj = new HttpEntity<>(user);
 		ResponseEntity<User> response = testRestTemplate.exchange(url,HttpMethod.PUT,requestObj,User.class);

@@ -55,7 +55,9 @@ public class OrderService {
 			this.orderRepository.save(addOrder);
 		}
 		catch(Exception ex) {
+			System.out.println(ex.getMessage().toString());
 			throw new Exception("Unable to add order "+ex.getMessage().toString());
+			
 		}
 	}
 	

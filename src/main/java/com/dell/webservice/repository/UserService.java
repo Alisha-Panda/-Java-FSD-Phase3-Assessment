@@ -20,6 +20,23 @@ public class UserService {
 	@Autowired
 	UserRepository userRepository;
 	
+	public boolean checkAdmin(String loginUser) {
+		Iterable<User> users = this.userRepository.findAll();
+		int flag = 0;
+		for(User u : users) {
+			if(u.getUsername().equals(loginUser) && u.getRole().toLowerCase().equals("admin")) {
+				flag = 1;
+				break;
+			}
+		}
+		if(flag == 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	public boolean loginEntityUser(User loginUser) {
 		Iterable<User> users = this.userRepository.findAll();
 		int flag = 0;

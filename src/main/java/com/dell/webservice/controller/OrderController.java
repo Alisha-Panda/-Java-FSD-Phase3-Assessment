@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dell.webservice.entity.Order;
 import com.dell.webservice.entity.User;
 import com.dell.webservice.repository.OrderService;
+import com.dell.webservice.repository.UserService;
 
 
 @RestController
@@ -28,6 +29,9 @@ public class OrderController {
 
 	@Autowired
 	OrderService orderService;
+	
+	@Autowired
+	UserService userService;
 	
 	@GetMapping("/getorders")
 	public ResponseEntity<?> getOrders(@RequestParam(defaultValue = "0") Integer pageNo, 
@@ -60,20 +64,26 @@ public class OrderController {
 	}
 	
 	@PostMapping("/addorder")
-	public ResponseEntity<?> addOrder(@RequestBody(required = false) Order addOrder){
+	public ResponseEntity<?> addOrder(@RequestBody(required = false) Order addOrder,@RequestParam(required = false) String userName){
 		if(addOrder == null) {
 			return new ResponseEntity<String>("Add Order request body cannot be empty", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 		try {
-			this.orderService.addEntityOrder(addOrder);
-			return new ResponseEntity<Order>(addOrder, new HttpHeaders(), HttpStatus.CREATED);
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				this.orderService.addEntityOrder(addOrder);
+				return new ResponseEntity<Order>(addOrder, new HttpHeaders(), HttpStatus.CREATED);
+			}
+			else {
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+			}
 		} catch (Exception e) {
 			return new ResponseEntity<String>("Unable to add orders",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@PutMapping("/updateorder/{orderId}")
-	public ResponseEntity<?> updateOrder(@PathVariable("orderId") int id, @RequestBody(required = false) Order updateOrder) {
+	public ResponseEntity<?> updateOrder(@PathVariable("orderId") int id, @RequestBody(required = false) Order updateOrder,@RequestParam(required = false) String userName) {
 		if(updateOrder == null) {
 			return new ResponseEntity<String>("Update Order request body cannot be empty",new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
@@ -81,12 +91,18 @@ public class OrderController {
 			return new ResponseEntity<String>("Id in request path and request body do not match",new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 		try {
-			Optional<Order> getOrder = this.orderService.getEntityOrder(id);
-			if(getOrder.isEmpty()) {
-				return new ResponseEntity<String>("Order does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				Optional<Order> getOrder = this.orderService.getEntityOrder(id);
+				if(getOrder.isEmpty()) {
+					return new ResponseEntity<String>("Order does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+				}
+				this.orderService.updateEntityOrder(updateOrder);
+				return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
 			}
-			this.orderService.updateEntityOrder(updateOrder);
-			return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+			else {
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+			}
 		}
 		catch(Exception ex) {
 			return new ResponseEntity<String>("Unable to update orders",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -94,15 +110,21 @@ public class OrderController {
 	}
 	
 	@DeleteMapping("/deleteorder/{orderId}")
-	public ResponseEntity<?> deleteOrder(@PathVariable("orderId") int id){
+	public ResponseEntity<?> deleteOrder(@PathVariable("orderId") int id,@RequestParam(required = false) String userName){
 		try {
-			Optional<Order> getOrder = this.orderService.getEntityOrder(id);
-			if(getOrder.isEmpty()) {
-				return new ResponseEntity<String>("Order does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				Optional<Order> getOrder = this.orderService.getEntityOrder(id);
+				if(getOrder.isEmpty()) {
+					return new ResponseEntity<String>("Order does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+				}
+				else {
+					this.orderService.deleteEntityOrder(id);
+					return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+				}
 			}
 			else {
-				this.orderService.deleteEntityOrder(id);
-				return new ResponseEntity<Order>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 			}
 		}
 		catch(Exception ex) {

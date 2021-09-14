@@ -32,7 +32,7 @@ public class ProductController {
 	ProductService productService;
 	
 	@Autowired
-	UserRepository userRepository ;
+	UserService userService ;
 	
 	@GetMapping("/getproducts")
 	public ResponseEntity<?> getProducts(@RequestParam(defaultValue = "0") Integer pageNo, 
@@ -49,15 +49,22 @@ public class ProductController {
 	}
 	
 	@GetMapping("/getproduct/{productId}")
-	public ResponseEntity<?> getProduct(@PathVariable("productId") int id) {
+	public ResponseEntity<?> getProduct(@PathVariable("productId") int id, @RequestParam(required = false) String userName) {
 		try {
-			Optional<Product> product = this.productService.getEntityProduct(id);
-			if(product.isEmpty()) {
-				return new ResponseEntity<String>("Products does not exist with id " + id, new HttpHeaders(), HttpStatus.NOT_FOUND); 
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				Optional<Product> product = this.productService.getEntityProduct(id);
+				if(product.isEmpty()) {
+					return new ResponseEntity<String>("Products does not exist with id " + id, new HttpHeaders(), HttpStatus.NOT_FOUND); 
+				}
+				else {
+					return new ResponseEntity<Optional<Product>>(product,new HttpHeaders(), HttpStatus.OK);
+				}
 			}
 			else {
-				return new ResponseEntity<Optional<Product>>(product,new HttpHeaders(), HttpStatus.OK);
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 			}
+			
 		}
 		catch(Exception ex) {
 			System.out.println(ex.getMessage().toString());
@@ -67,20 +74,26 @@ public class ProductController {
 	
 	
 	@PostMapping("/addproduct")
-	public ResponseEntity<?> addProduct(@RequestBody(required = false) Product addProduct){
+	public ResponseEntity<?> addProduct(@RequestBody(required = false) Product addProduct, @RequestParam(required = false) String userName){
 		if(addProduct == null) {
 			return new ResponseEntity<String>("Add Product request body cannot be empty", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 		try {
-			this.productService.addEntityProduct(addProduct);
-			return new ResponseEntity<Product>(addProduct, new HttpHeaders(), HttpStatus.CREATED);
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				this.productService.addEntityProduct(addProduct);
+				return new ResponseEntity<Product>(addProduct, new HttpHeaders(), HttpStatus.CREATED);
+			}
+			else {
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+			}
 		} catch (Exception e) {
 			return new ResponseEntity<String>("Unable to add products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@PutMapping("/updateproduct/{productId}")
-	public ResponseEntity<?> updateProduct(@PathVariable("productId") int id, @RequestBody(required = false) Product updateProduct) {
+	public ResponseEntity<?> updateProduct(@PathVariable("productId") int id, @RequestBody(required = false) Product updateProduct,@RequestParam(required = false) String userName) {
 		if(updateProduct == null) {
 			return new ResponseEntity<String>("Update Product request body cannot be empty",new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
@@ -88,12 +101,18 @@ public class ProductController {
 			return new ResponseEntity<String>("Id in request path and request body do not match",new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 		try {
-			Optional<Product> getProduct = this.productService.getEntityProduct(id);
-			if(getProduct.isEmpty()) {
-				return new ResponseEntity<String>("Product does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				Optional<Product> getProduct = this.productService.getEntityProduct(id);
+				if(getProduct.isEmpty()) {
+					return new ResponseEntity<String>("Product does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+				}
+				this.productService.updateEntityProduct(updateProduct);
+				return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
 			}
-			this.productService.updateEntityProduct(updateProduct);
-			return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+			else {
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+			}
 		}
 		catch(Exception ex) {
 			return new ResponseEntity<String>("Unable to update products",new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -101,15 +120,21 @@ public class ProductController {
 	}
 	
 	@DeleteMapping("/deleteproduct/{productId}")
-	public ResponseEntity<?> deleteProduct(@PathVariable("productId") int id){
+	public ResponseEntity<?> deleteProduct(@PathVariable("productId") int id,@RequestParam(required = false) String userName){
 		try {
-			Optional<Product> getProduct= this.productService.getEntityProduct(id);
-			if(getProduct.isEmpty()) {
-				return new ResponseEntity<String>("Product does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+			boolean check = userService.checkAdmin(userName);
+			if(check == true) {
+				Optional<Product> getProduct= this.productService.getEntityProduct(id);
+				if(getProduct.isEmpty()) {
+					return new ResponseEntity<String>("Product does not exist with id " + id,new HttpHeaders(), HttpStatus.NOT_FOUND);
+				}
+				else {
+					this.productService.deleteEntityProduct(id);
+					return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+				}
 			}
 			else {
-				this.productService.deleteEntityProduct(id);
-				return new ResponseEntity<Product>(new HttpHeaders(), HttpStatus.NO_CONTENT);
+				return new ResponseEntity<String>("Unauthorized Request",new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 			}
 		}
 		catch(Exception ex) {

@@ -45,10 +45,10 @@ public class OrderControllerTest {
 	@DisplayName("Get order by id")
 	public void testGetOrderById() {
 		
-		String url = "http://localhost:"+randomPort+"/api/v1/order/getorder/25";
+		String url = "http://localhost:"+randomPort+"/api/v1/order/getorder/40";
 		ResponseEntity<Order> response = testRestTemplate.getForEntity(url,Order.class);
 		assertEquals(200,response.getStatusCode().value());
-		assertEquals(15, response.getBody().getId());
+		assertEquals(40, response.getBody().getId());
 		assertEquals("Alisha", response.getBody().getName());
 		assertEquals("abcd@gmail.com", response.getBody().getEmail());
 	}
@@ -57,15 +57,16 @@ public class OrderControllerTest {
 	@DisplayName("Add order")
 	public void testAddOrder() {
 		
-		String url = "http://localhost:"+randomPort+"/api/v1/order/addorder";
-		Product product = new Product(15,"Puma Cell Endura",55447.0,"Puma Cell Endura","PUMA","Running and Training","Amazon",new Date());
+		String url = "http://localhost:"+randomPort+"/api/v1/order/addorder?userName=Tanuja";
+		Product product = new Product("Puma Cell Endura",55447.0,"Puma Cell Endura","PUMA","Running and Training","Amazon",new Date());
 		Set<Product> productList = new HashSet<Product>(); 
 		productList.add(product);
 		Order order = new Order("Alisha",0.0,"abcd@gmail.com","3B 201, Soul Space Arista, ORR, Bangalore","9876564534",productList);
 		
 		HttpEntity<Order> requestObj = new HttpEntity<>(order);
 		ResponseEntity<Order> response = testRestTemplate.postForEntity(url,requestObj,Order.class);
-		
+		System.out.println(response.getBody());
+		System.out.println(response.getStatusCode().value());
 		assertEquals(201,response.getStatusCode().value());
 		assertEquals("Alisha", response.getBody().getName());
 		assertEquals("abcd@gmail.com", response.getBody().getEmail());
@@ -75,12 +76,12 @@ public class OrderControllerTest {
 	@DisplayName("Update order") 
 	public void testUpdateOrder() {
 		
-		String url = "http://localhost:"+randomPort+"/api/v1/order/updateorder/25";
+		String url = "http://localhost:"+randomPort+"/api/v1/order/updateorder/40?userName=Tanuja";
 		
-		Product product = new Product(15,"Puma Cell Endura",55447.0,"Puma Cell Endura","PUMA","Running and Training","Amazon",new Date());
+		Product product = new Product(27,"Puma Cell Endura",55447.0,"Puma Cell Endura","PUMA","Running and Training","Amazon",new Date());
 		Set<Product> productList = new HashSet<Product>(); 
 		productList.add(product);
-		Order order = new Order(25,"Alisha",0.0,"abcd@gmail.com","3B 201, Soul Space Arista, ORR, Bangalore","9876564534",productList);
+		Order order = new Order(40,"Alisha",0.0,"abcd@gmail.com","3B 201, Soul Space Arista, ORR, Bangalore","9876564534",productList);
 		
 		HttpEntity<Order> requestObj = new HttpEntity<>(order);
 		ResponseEntity<Order> response = testRestTemplate.exchange(url,HttpMethod.PUT,requestObj,Order.class);
@@ -93,7 +94,7 @@ public class OrderControllerTest {
 	@DisplayName("Delete order")
 	public void testDeleteOrder() {
 		
-		String url = "http://localhost:"+randomPort+"/api/v1/order/deleteorder/25";
+		String url = "http://localhost:"+randomPort+"/api/v1/order/deleteorder/45?userName=Tanuja";
 		testRestTemplate.delete(url,Order.class);
 	}
 
