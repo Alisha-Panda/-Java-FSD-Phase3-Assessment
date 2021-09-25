@@ -52,7 +52,7 @@ public class UserControllerTest {
 	public void testAddUser() {
 		
 		String url = "http://localhost:"+randomPort+"/api/v1/user/adduser";
-		User user = new User("Tanuja","abcd","Tanuja.Lavu@dell.com","admin",true);
+		User user = new User("Tanuja","abcd","Tanuja.Lavu@dell.com","admin",10000.57,true);
 		
 		HttpEntity<User> requestObj = new HttpEntity<>(user);
 		ResponseEntity<User> response = testRestTemplate.postForEntity(url,requestObj,User.class);
@@ -67,7 +67,7 @@ public class UserControllerTest {
 	public void testUpdateUser() {
 		
 		String url = "http://localhost:"+randomPort+"/api/v1/user/updateuser/16";
-		User user = new User(16,"Avilasa","abcd","Avilasa.Das@dell.com","user",true);
+		User user = new User(16,"Avilasa","abcd","Avilasa.Das@dell.com","user",10000.57,true);
 		
 		HttpEntity<User> requestObj = new HttpEntity<>(user);
 		ResponseEntity<User> response = testRestTemplate.exchange(url,HttpMethod.PUT,requestObj,User.class);

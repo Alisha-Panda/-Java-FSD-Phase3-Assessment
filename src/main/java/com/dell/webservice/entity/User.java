@@ -28,6 +28,9 @@ public class User {
 	@Column(name = "role")
 	private String role;
 	
+	@Column(name = "walletBalance")
+	private double walletBalance;
+	
 	@Column(name = "loggedIn")
 	private boolean loggedIn = false;
 
@@ -36,25 +39,35 @@ public class User {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public User(String username, String password, String email, String role, boolean loggedIn) {
+	public User(String username, String password, String email, String role, double walletBalance, boolean loggedIn) {
 		super();
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.role = role;
+		this.walletBalance = walletBalance;
 		this.loggedIn = loggedIn;
 	}
 
-	public User(int id, String username, String password, String email, String role, boolean loggedIn) {
+	public User(int id, String username, String password, String email, String role, double walletBalance, boolean loggedIn) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.role = role;
+		this.walletBalance = walletBalance;
 		this.loggedIn = loggedIn;
 	}
 
+
+	public double getWalletBalance() {
+		return walletBalance;
+	}
+
+	public void setWalletBalance(double walletBalance) {
+		this.walletBalance = walletBalance;
+	}
 
 	public int getId() {
 		return id;
@@ -103,12 +116,12 @@ public class User {
 	public void setLoggedIn(boolean loggedIn) {
 		this.loggedIn = loggedIn;
 	}
-	
 
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email + ", role="
-				+ role + ", loggedIn=" + loggedIn + "]";
-	}	
+				+ role + ", walletBalance=" + walletBalance + ", loggedIn=" + loggedIn + "]";
+	}
+	
 
 }

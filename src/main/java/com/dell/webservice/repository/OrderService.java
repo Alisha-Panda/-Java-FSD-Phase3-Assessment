@@ -13,13 +13,18 @@ import org.springframework.stereotype.Service;
 
 import com.dell.webservice.entity.Order;
 import com.dell.webservice.entity.Product;
+import com.dell.webservice.entity.User;
 import com.dell.webservice.interfaces.OrderRepository;
 import com.dell.webservice.interfaces.ProductRepository;
+import com.dell.webservice.interfaces.UserRepository;
 
 @Service
 public class OrderService {
 	@Autowired
 	OrderRepository orderRepository;
+	
+	@Autowired
+	UserRepository userRepository;
 	
 	public List<Order> getEntityOrders(Integer pageNo, Integer pageSize, String sortBy) throws Exception{
 		try {
@@ -45,14 +50,37 @@ public class OrderService {
 	}
 	public void addEntityOrder(Order addOrder) throws Exception {
 		try {
+			int cflag = 0;
+			int bfalg = 0;
 			double total = 0.0;
 			for( Product prod : addOrder.getProducts()) {
 				System.out.print(prod.getPrice());
 				total = total+ prod.getPrice();
 			}
+			System.out.println("total balance");
 			System.out.println(total);
 			addOrder.setTotalPrice(total);
 			this.orderRepository.save(addOrder);
+			Iterable<User> users = this.userRepository.findAll();
+			for(User u : users) {
+				if(u.getUsername().equals(addOrder.getName())) {
+					System.out.println("wallet balance");
+					System.out.println(u.getWalletBalance());
+					if(total <= u.getWalletBalance()) {
+						double balance = u.getWalletBalance() - total;
+						u.setWalletBalance(balance);
+						this.userRepository.save(u);
+					    cflag = 1;
+						break;
+					}
+					else {
+						throw new Exception("Insufficient balance for user "+addOrder.getName());
+					}
+				}
+			}
+			if(cflag == 0) {
+				throw new Exception("Customer not found");
+			}
 		}
 		catch(Exception ex) {
 			System.out.println(ex.getMessage().toString());
